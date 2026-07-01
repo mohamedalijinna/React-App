@@ -26,7 +26,7 @@ pipeline {
 		stage('Deploy') {
 			steps {
 				bat '''
-				ssh -i D:\\ssh.pub ^
+				ssh -i D:\\ssh ^
 				-o StrictHostKeyChecking=no ^
 				ubuntu@13.61.151.127 ^
 				"cd /var/www/project && \
