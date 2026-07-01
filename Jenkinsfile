@@ -23,27 +23,31 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
-            steps {
-
-                sshagent(['aws-ec2']) {
-
-                    bat '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@13.61.151.127 "
-                    cd /var/www/html/React-App &&
-                    git pull origin main &&
-                    composer install --no-dev &&
-                    npm install &&
-                    npm run build &&
-                    php artisan migrate --force &&
-                    php artisan optimize &&
-                    sudo systemctl restart nginx &&
-                    sudo systemctl restart php8.2-fpm
-                    "
-                    '''
-                }
-
-            }
-        }
+stage('Deploy') {
+    steps {
+        sshPublisher(
+            publishers: [
+                sshPublisherDesc(
+                    configName: 'aws-ec2',
+                    transfers: [
+                        sshTransfer(
+                            execCommand: '''
+cd /var/www/html/React-App
+git pull origin main
+composer install --no-dev
+npm install
+npm run build
+php artisan migrate --force
+php artisan optimize
+sudo systemctl restart nginx
+sudo systemctl restart php8.2-fpm
+'''
+                        )
+                    ]
+                )
+            ]
+        )
+    }
+}
     }
 }
