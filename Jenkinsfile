@@ -26,7 +26,9 @@ pipeline {
 		stage('Deploy') {
 			steps {
 				bat '''
-				ssh -o StrictHostKeyChecking=no ubuntu@13.61.151.127 ^
+				ssh -i D:\\ssh\\ssh.pub ^
+				-o StrictHostKeyChecking=no ^
+				ubuntu@13.61.151.127 ^
 				"cd /var/www/project && \
 				git pull origin main && \
 				composer install --no-dev && \
