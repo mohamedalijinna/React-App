@@ -10,48 +10,41 @@ pipeline {
             }
         }
 
-        stage('Composer Install') {
+        stage('Install') {
             steps {
-                bat 'composer install'
-            }
-        }
-
-        stage('Install Node Modules') {
-            steps {
+                bat 'composer install --no-dev'
                 bat 'npm install'
             }
         }
 
-        stage('Build Assets') {
+        stage('Build') {
             steps {
                 bat 'npm run build'
             }
         }
 
-        stage('Run Tests') {
+        stage('Deploy') {
             steps {
-                bat 'php artisan test'
-            }
-        }
 
-        stage('Optimize Laravel') {
-            steps {
-                bat 'php artisan optimize'
+                sshagent(['aws-ec2']) {
+
+                    bat '''
+                    ssh -o StrictHostKeyChecking=no ubuntu@13.61.151.127 "
+                    cd /var/www/project &&
+                    git pull origin main &&
+                    composer install --no-dev &&
+                    npm install &&
+                    npm run build &&
+                    php artisan migrate --force &&
+                    php artisan optimize &&
+                    sudo systemctl restart nginx &&
+                    sudo systemctl restart php8.2-fpm
+                    "
+                    '''
+                }
+
             }
         }
 
     }
-
-    post {
-
-        success {
-            echo 'Build Successful!'
-        }
-
-        failure {
-            echo 'Build Failed!'
-        }
-
-    }
-
 }
