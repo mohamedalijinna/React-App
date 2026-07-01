@@ -32,14 +32,34 @@ stage('Deploy') {
                     transfers: [
                         sshTransfer(
                             execCommand: '''
-cd /var/www/html/React-App
+set -x
+
+pwd
+
+whoami
+
+ls -la
+
+cd /var/www/html/React-App || exit 1
+
+pwd
+
+git status
+
 git pull origin main
+
 composer install --no-dev
+
 npm install
+
 npm run build
+
 php artisan migrate --force
+
 php artisan optimize
+
 sudo systemctl restart nginx
+
 sudo systemctl restart php8.2-fpm
 '''
                         )
